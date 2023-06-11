@@ -3,10 +3,12 @@ import { words } from '../data/words';
 import { shuffle } from '../utils/generalUtils';
 
 export const Game = () => {
+    const TIMER_DURATION = 10;
+
     const [typedWord, setTypedWord] = useState('');
     const [score, setScore] = useState(0);
 
-    const [timer, setTimer] = useState(10);
+    const [timer, setTimer] = useState(TIMER_DURATION);
 
     const [shuffledWords, setShuffledWords] = useState([]);
 
@@ -60,7 +62,7 @@ export const Game = () => {
     };
 
     const checkWord = () => {
-        if (typedWord.length == 0) {
+        if (typedWord.length === 0) {
             return;
         }
 
@@ -76,11 +78,11 @@ export const Game = () => {
     }
 
     const calculateWPM = () => {
-        if (timer === 10) {
+        if (timer === TIMER_DURATION) {
             return 0;
         }
 
-        const totalTimeInSeconds = 10 - timer;
+        const totalTimeInSeconds = TIMER_DURATION - timer;
         const wpm = (score / totalTimeInSeconds) * 60;
 
         return Math.round(wpm);
@@ -103,37 +105,38 @@ export const Game = () => {
     };
 
     return (
-        <>
-            <div className="flex flex-col justify-center">
-                <h1>Typing game</h1>
+        <div className="flex flex-col justify-center items-center bg-gradient-to-br from-indigo-500 to-purple-500 min-h-screen">
+            <div className="max-w-md mx-auto">
+                <h1 className="text-4xl text-center font-bold text-white mb-4">Typing Game</h1>
 
-                <p className="mt-8 text-2xl">Score: {score}/{words.length}</p>
-                <p className="mt-4">WPM: {calculateWPM()}</p>
+                <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+                    <p className="text-lg font-semibold text-gray-800">Score: {score}/{words.length}</p>
+                    <p className="text-lg text-gray-800">WPM: {calculateWPM()}</p>
+                </div>
 
-                {!finished && <p className="mt-16 text-2xl">Timer: {timer}</p>}
-
-                <div>
-                    {finished && (
-                        <div className="flex justify-center">
-                            <div>
-                                {renderWords()}
-                            </div>
+                {!finished && (
+                    <div>
+                        <p className="text-4xl font-bold text-white mb-8">Timer: {timer}</p>
+                        <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
+                            <p className="text-4xl text-center font-bold text-gray-800">{shuffledWords[index]}</p>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                <div className="mt-8 flex flex-row justify-center text-2xl font-bold">
-                    <p>{shuffledWords[index]}</p>
-                </div>
+                {finished && (
+                    <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
+                        {renderWords()}
+                    </div>
+                )}
 
                 <input
-                    className="mt-8 h-16 text-3xl"
+                    className="w-full h-16 text-3xl px-4 border border-gray-400 rounded-lg"
                     type="text"
                     value={typedWord}
                     onChange={onChange}
                     disabled={finished}
                 />
             </div>
-        </>
+        </div>
     );
 };
