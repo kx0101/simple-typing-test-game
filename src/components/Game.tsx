@@ -104,19 +104,40 @@ export const Game = () => {
         });
     };
 
+    const restartGame = () => {
+        setTypedWord('');
+        setScore(0);
+        setTimer(TIMER_DURATION);
+        setShuffledWords(shuffle(words));
+        setIsTypingStarted(false);
+        setFinished(false);
+        setIndex(0);
+        setCorrectWords([]);
+    };
+
     return (
         <div className="flex flex-col justify-center items-center bg-gradient-to-br from-indigo-500 to-purple-500 min-h-screen">
             <div className="max-w-md mx-auto">
-                <h1 className="text-4xl text-center font-bold text-white mb-4">Typing Game</h1>
+                <h1 className="text-4xl text-center font-bold text-white mb-4 mt-4">Typing Game</h1>
 
-                <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+                <div className="bg-white rounded-lg shadow-lg p-4 mb-24">
                     <p className="text-lg font-semibold text-gray-800">Score: {score}/{words.length}</p>
                     <p className="text-lg text-gray-800">WPM: {calculateWPM()}</p>
+
+                    {finished && (
+                        <button
+                            className="mt-4 border-4 border-gray-800 text-center px-6 py-3 text-lg font-bold bg-green-400 text-black rounded-lg hover:border-red-600"
+                            onClick={restartGame}
+                        >
+                            Restart
+                        </button>
+                    )}
                 </div>
+
 
                 {!finished && (
                     <div>
-                        <p className="text-4xl font-bold text-white mb-8">Timer: {timer}</p>
+                        <p className="text-4xl text-center font-bold text-white mb-8">Timer: {timer}</p>
                         <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
                             <p className="text-4xl text-center font-bold text-gray-800">{shuffledWords[index]}</p>
                         </div>
@@ -135,6 +156,7 @@ export const Game = () => {
                     value={typedWord}
                     onChange={onChange}
                     disabled={finished}
+                    placeholder='Start typing here!'
                 />
             </div>
         </div>
