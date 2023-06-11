@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { words } from '../data/words';
 import { shuffle } from '../utils/generalUtils';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 export const Game = () => {
-    const TIMER_DURATION = 10;
+    const TIMER_DURATION = 60;
 
     const [typedWord, setTypedWord] = useState('');
     const [score, setScore] = useState(0);
@@ -18,6 +21,9 @@ export const Game = () => {
     const [index, setIndex] = useState(0);
     const [correctWords, setCorrectWords] = useState<string[]>([]);
 
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('correct');
+
     useEffect(() => {
         setShuffledWords(shuffle(words));
     }, []);
@@ -31,6 +37,11 @@ export const Game = () => {
             return () => {
                 clearInterval(timerId);
             };
+        }
+
+        if (timer === 0) {
+            setIsTypingStarted(false);
+            setFinished(true);
         }
     }, [isTypingStarted, timer]);
 
@@ -88,20 +99,36 @@ export const Game = () => {
         return Math.round(wpm);
     };
 
-    const renderWords = () => {
-        return shuffledWords.map((word) => {
-            const isCorrect = correctWords.includes(word);
-            const className = isCorrect ? "bg-green-400" : "bg-red-400";
+    const renderCorrectWords = () => {
+        return (
+            <div>
+                <h2 className="text-2xl font-semibold mb-4">Correct Words</h2>
 
-            return (
-                <p
-                    key={word}
-                    className={`mt-4 p-2 text-black rounded-md ${className}`}
-                >
-                    {word}
-                </p>
-            );
-        });
+                {correctWords.map((word) => (
+                    <p key={word} className="mt-2 p-2 text-black rounded-md bg-green-400">
+                        {word}
+                    </p>
+                ))}
+            </div>
+        );
+    };
+
+    const renderWrongWords = () => {
+        const wrongWords = shuffledWords
+            .slice(0, index)
+            .filter((word, i) => !correctWords.includes(shuffledWords[i]));
+
+        return (
+            <div>
+                <h2 className="text-2xl font-semibold mb-4">Wrong Words</h2>
+
+                {wrongWords.map((word) => (
+                    <p key={word} className="mt-2 p-2 text-black rounded-md bg-red-400">
+                        {word}
+                    </p>
+                ))}
+            </div>
+        );
     };
 
     const restartGame = () => {
@@ -113,6 +140,18 @@ export const Game = () => {
         setFinished(false);
         setIndex(0);
         setCorrectWords([]);
+    };
+
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+
+    const switchTab = (tab: string) => {
+        setActiveTab(tab);
     };
 
     return (
@@ -144,12 +183,6 @@ export const Game = () => {
                     </div>
                 )}
 
-                {finished && (
-                    <div className="bg-white rounded-lg shadow-lg p-4 mb-8">
-                        {renderWords()}
-                    </div>
-                )}
-
                 <input
                     className="w-full h-16 text-3xl px-4 border border-gray-400 rounded-lg"
                     type="text"
@@ -159,6 +192,42 @@ export const Game = () => {
                     placeholder='Start typing here!'
                 />
             </div>
+
+            {finished && (
+                <button
+                    className="mt-4 px-6 py-3 text-lg font-semibold bg-indigo-600 text-white rounded-lg"
+                    onClick={openModal}
+                >
+                    View Analytics
+                </button>
+            )}
+
+            <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
+                <div className="flex justify-center items-center">
+                    <button
+                        className={`px-4 py-2 font-semibold text-lg ${activeTab === 'correct' ? 'text-gray-800' : 'text-gray-500'
+                            }`}
+                        onClick={() => switchTab('correct')}
+                    >
+                        Correct Words
+                    </button>
+                    <button
+                        className={`px-4 py-2 font-semibold text-lg ${activeTab === 'wrong' ? 'text-gray-800' : 'text-gray-500'
+                            }`}
+                        onClick={() => switchTab('wrong')}
+                    >
+                        Wrong Words
+                    </button>
+                </div>
+
+                <div className="mt-4 p-4">
+                    {activeTab === 'correct' ? renderCorrectWords() : renderWrongWords()}
+                </div>
+
+                <button className="mt-4 px-6 py-3 text-lg font-semibold bg-indigo-600 text-white rounded-lg" onClick={closeModal}>
+                    Close
+                </button>
+            </Modal>
         </div>
     );
 };
